@@ -15,7 +15,7 @@ from simopt.problem_types import ConstraintType, ObjectiveType, VariableType
 from simopt.utils import get_specifications
 
 
-class BudgetExhaustedError(Exception):
+class ExhaustedError(Exception):
     """Raised when a solver exceeds its allotted simulation budget.
 
     This exception is thrown by :class:`Budget` when a call to
