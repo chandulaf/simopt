@@ -24,6 +24,8 @@ class ExhaustedError(Exception):
     cleanly once the budget is exhausted.
     """
 
+class BudgetExhaustedError(ExhaustedError):
+    """Raised when a solver exceeds its allotted simulation budget."""
 
 class Budget:
     """Tracks and enforces a solver's replication budget.
