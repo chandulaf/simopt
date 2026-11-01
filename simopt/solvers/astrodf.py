@@ -987,8 +987,10 @@ class ASTRODF(Solver):
 
         '''changed code from "while ctx.budget.remaining > 0"
         to "while ctx.budget.remaining > 0 and self.iteration_count < 1:" 
-        to stop after one iteration.'''
-        while ctx.budget.remaining > 0 and self.iteration_count < 1:
+        to stop after one iteration.
+        Changed it back.
+        '''
+        while ctx.budget.remaining > 0:
             self.iterate(ctx)
 
 
