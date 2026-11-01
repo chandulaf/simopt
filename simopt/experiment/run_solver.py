@@ -61,18 +61,23 @@ def _set_up_rngs(solver: Solver, problem: Problem, mrep: int) -> None:
     solver.solution_progenitor_rngs = simulation_rngs
     solver.rng_list = solver_rngs
 
+import traceback 
+try:
+    def _run_solver(solver: Solver, problem: Problem) -> pd.DataFrame:
+        ctx = Context(
+            problem=problem,
+            total_budget=problem.factors["budget"],
+            solution_progenitor_rngs=solver.solution_progenitor_rngs,
+            crn_across_solns=solver.config.crn_across_solns,
+        )
+        with contextlib.suppress(BudgetExhaustedError):
+            solver.solve(problem, ctx)
 
-def _run_solver(solver: Solver, problem: Problem) -> pd.DataFrame:
-    ctx = Context(
-        problem=problem,
-        total_budget=problem.factors["budget"],
-        solution_progenitor_rngs=solver.solution_progenitor_rngs,
-        crn_across_solns=solver.config.crn_across_solns,
-    )
-    with contextlib.suppress(BudgetExhaustedError):
-        solver.solve(problem, ctx)
-
-    return ctx.history()
+        return ctx.history()
+        pass
+except BudgetExhaustedError:
+    traceback.print_exc()
+    
 
 
 def _run_mrep(solver: Solver, problem: Problem, mrep: int) -> tuple[pd.DataFrame, float]:
