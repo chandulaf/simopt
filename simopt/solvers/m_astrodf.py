@@ -121,7 +121,7 @@ class ASTRODF(Solver):
     config_class: ClassVar[type[SolverConfig]] = ASTRODFConfig
     class_name_abbr: ClassVar[str] = "ASTRODF"
     class_name: ClassVar[str] = "ASTRO-DF"
-    objective_type: ClassVar[ObjectiveType] = ObjectiveType.SINGLE
+    objective_type: ClassVar[ObjectiveType] = ObjectiveType.MULTI #changed from .SINGLE to .MULTI
     constraint_type: ClassVar[ConstraintType] = ConstraintType.BOX
     variable_type: ClassVar[VariableType] = VariableType.CONTINUOUS
     gradient_needed: ClassVar[bool] = False
@@ -369,7 +369,7 @@ class ASTRODF(Solver):
                 if self.enable_gradient:
                     rhs_for_kappa = norm(solution.objectives_gradients_mean[0])
                 else:
-                    rhs_for_kappa = solution.objectives_mean
+                    rhs_for_kappa = solution.objectives_mean[:1]
                 kappa = (
                     rhs_for_kappa * np.sqrt(pilot_run) / (delta_k ** (self.delta_power / 2))
                 ).item()
@@ -983,6 +983,8 @@ class ASTRODF(Solver):
 
     def solve(self, problem: Problem, ctx: Context) -> None:
         self.problem = problem
+        if problem.n_objectives != 2:
+            raise ValueError(f"M_ASTRODF needs two objective functions, but got {problem.n_objectives}.")
         self._initialize_solving(ctx)
 
         '''changed code from "while ctx.budget.remaining > 0"
