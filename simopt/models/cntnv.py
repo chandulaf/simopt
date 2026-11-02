@@ -145,3 +145,23 @@ class CntNVMaxProfit(Problem):
     def get_random_solution(self, rand_sol_rng: MRG32k3a) -> tuple:
         # Generate an Exponential(rate = 1) r.v.
         return (rand_sol_rng.expovariate(1),)
+
+"""Adding a new problem"""
+
+class CntNVMaxProfit_2obj(CntNVMaxProfit):  
+    class_name_abbr: ClassVar[str] = "CNTNEWS-2OBJ"  
+    class_name: ClassVar[str] = "Max Profit for Continuous Newsvendor (2 objectives)"  
+    n_objectives: ClassVar[int] = 2  
+    minmax: ClassVar[tuple[int, ...]] = (1, 1)  # length changed for n_objectives = 2
+
+    @override
+    def build(self) -> dsl.Model:
+        problem = dsl.Model()
+        order_quantity = problem.add_continuous_variable(
+            lb=0.0, ub=np.inf, initial=self.factors["initial_solution"][0]
+        )
+        simulation = self.add_simulation(problem, {"order_quantity": order_quantity})
+        """Now has two objectives instead of one. But both are same."""
+        problem.maximize(dsl.mean(simulation.metric("profit")))
+        problem.maximize(dsl.mean(simulation.metric("profit")))
+        return problem
