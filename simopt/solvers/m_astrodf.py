@@ -1,4 +1,4 @@
-"""ASTRO-DF Solver.
+"""ASTRO-DF Solver (The M-ASTRO-DF version 1).
 
 The ASTRO-DF solver progressively builds local models (quadratic with diagonal Hessian)
 using interpolation on a set of points on the coordinate bases of the best (incumbent)
@@ -664,7 +664,7 @@ class ASTRODF(Solver):
                 "skipping Hessian update to avoid numerical instability. "
                 f"({self.hessian_skip_count} consecutive skips)"
             )
-            logging.debug(message)
+            logging.debug(message) #logs debug message if Hessian update is skipped 10 times. 
             if self.hessian_skip_count == 10:
                 message = (
                     "Hessian update skipped 10 consecutive times. Check optimization stability."
@@ -879,6 +879,7 @@ class ASTRODF(Solver):
                     ) > 0.75
 
             if condition_met or high_variance:
+                logging.debug("iter %d: pattern search used (condition_met=%s, high_variance=%s, fval_tilde=%s, min_fval=%s)", self.iteration_count, condition_met, high_variance, fval_tilde, min_fval)
                 fval_tilde = min_fval
                 min_idx = np.argmin(fval)
                 candidate_x = y_var[min_idx][0]
@@ -896,6 +897,7 @@ class ASTRODF(Solver):
                 q,
             ) - self.evaluate_model(s, q)
         rho = 0 if model_reduction <= 0 else (fval[0] - fval_tilde) / model_reduction
+        logging.debug("iter %d: delta_k=%s incumbent_x=%s candidate_x=%s rho=%s", self.iteration_count, self.delta_k, self.incumbent_x, candidate_x, rho)
 
         successful = rho >= self.eta_1
         # successful: accept
