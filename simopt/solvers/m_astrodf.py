@@ -117,10 +117,10 @@ class ASTRODFConfig(SolverConfig):
 class ASTRODF(Solver):
     """The ASTRO-DF solver."""
 
-    name: str = "ASTRODF"
+    name: str = "M_ASTRODF"
     config_class: ClassVar[type[SolverConfig]] = ASTRODFConfig
-    class_name_abbr: ClassVar[str] = "ASTRODF"
-    class_name: ClassVar[str] = "ASTRO-DF"
+    class_name_abbr: ClassVar[str] = "M_ASTRODF"
+    class_name: ClassVar[str] = "M-ASTRO-DF"
     objective_type: ClassVar[ObjectiveType] = ObjectiveType.MULTI #changed from .SINGLE to .MULTI
     constraint_type: ClassVar[ConstraintType] = ConstraintType.BOX
     variable_type: ClassVar[VariableType] = VariableType.CONTINUOUS
@@ -498,7 +498,7 @@ class ASTRODF(Solver):
                     self.perform_adaptive_sampling(ctx, adapt_soln, pilot_run, delta_k)
 
                 # Append the function estimate to the list
-                fval.append(adapt_soln.objectives_mean)
+                fval.append(adapt_soln.objectives_mean[:1])
                 interpolation_solns.append(adapt_soln)
 
             # construct the model and obtain the model coefficients
@@ -738,7 +738,7 @@ class ASTRODF(Solver):
 
         # use Taylor expansion if gradient available
         if self.enable_gradient:
-            fval = np.ones(2 * self.problem.dim + 1) * self.incumbent_solution.objectives_mean
+            fval = np.ones(2 * self.problem.dim + 1) * self.incumbent_solution.objectives_mean[:1]
             grad = self.incumbent_solution.objectives_gradients_mean[0]
             hessian = self.h_k
             # Set empty variables to get rid of typing warnings
@@ -842,7 +842,7 @@ class ASTRODF(Solver):
         #     final_ob = fval[0]
         # else:
         # calculate success ratio
-        fval_tilde = candidate_solution.objectives_mean
+        fval_tilde = candidate_solution.objectives_mean[:1]
         # replace the candidate x if the interpolation set has lower objective function
         # value and with sufficient reduction (pattern search)
         # also if the candidate solution's variance is high that could be caused by
