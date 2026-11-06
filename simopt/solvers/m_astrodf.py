@@ -466,7 +466,7 @@ class ASTRODF(Solver):
             # the design points within the trust region
             f_index = distance_array.index(max(distance_array))
 
-            var_y, var_z = self.select_interpolation_points(delta_k, f_index)
+            var_y, var_z = self.select_interpolation_points(delta_k, f_index) # points for interpolation and reused design point
 
             # Evaluate the function estimate for the interpolation points
             fval = []
@@ -498,11 +498,13 @@ class ASTRODF(Solver):
                     self.perform_adaptive_sampling(ctx, adapt_soln, pilot_run, delta_k)
 
                 # Append the function estimate to the list
-                fval.append(adapt_soln.objectives_mean[:1])
+                fval.append(adapt_soln.objectives_mean[:1]) ## Function estimates for interpolation points
                 interpolation_solns.append(adapt_soln)
 
             # construct the model and obtain the model coefficients
             q, grad, hessian = self.get_model_coefficients(var_z, fval, self.problem)
+            logging.debug("iter %d pass %d: delta_k=%s\n  y (points)=%s\n  z (displacements)=%s\n  fval=%s\n  q=%s\n  grad=%s hessian_diag=%s",
+            self.iteration_count, model_iterations, delta_k, [np.ravel(p[0]).tolist() for p in var_y], [np.ravel(p[0]).tolist() for p in var_z], [float(np.ravel(f)[0]) for f in fval], q, grad, hessian)
 
             norm_grad = norm(grad)
             if delta_k <= mu * norm_grad or norm_grad == 0:
@@ -547,7 +549,7 @@ class ASTRODF(Solver):
                 - y_mean (np.ndarray): Mean of the y_var design points.
                 - fval_mean (np.ndarray): Mean of the function values.
         """
-        num_design_points = 2 * problem.dim + 1
+        num_design_points = 2 * problem.dim + 1   # no. of design points = 2d + 1
 
         # Construct the matrix with ones, linear terms, and squared terms
         m_var = np.array(
