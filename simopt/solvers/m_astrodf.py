@@ -987,8 +987,8 @@ class ASTRODF(Solver):
 
     def solve(self, problem: Problem, ctx: Context) -> None:
         self.problem = problem
-        if problem.n_objectives != 2:
-            raise ValueError(f"M_ASTRODF needs two objective functions, but got {problem.n_objectives}.")
+        if problem.n_objectives <= 1:
+            raise ValueError(f"M_ASTRODF needs at least two objective functions, but got {problem.n_objectives}.")
         self._initialize_solving(ctx)
 
         '''changed code from "while ctx.budget.remaining > 0"
