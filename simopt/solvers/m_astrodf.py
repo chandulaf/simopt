@@ -30,6 +30,7 @@ from math import ceil, log
 from typing import Annotated, ClassVar, Self
 
 import numpy as np
+import cvxpy as cp
 from numpy.linalg import LinAlgError, inv, norm, pinv
 from pydantic import Field, model_validator
 from scipy.optimize import NonlinearConstraint, OptimizeResult, minimize
