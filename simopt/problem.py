@@ -532,7 +532,8 @@ class Solution:
         """
         stochastic_constraints = result.stochastic_constraints
 
-        self._objectives.append(np.array([result.objective]))
+        #self._objectives.append(np.array([result.objective]))
+        self._objectives.append(np.array([result.objective, *result.extra_objectives]))
         self._objectives_array = None
 
         objective_gradient = result.objective_gradient

@@ -470,6 +470,7 @@ class ASTRODF(Solver):
 
             # Evaluate the function estimate for the interpolation points
             fval = []
+            fval_all = []
             double_dim = 2 * self.problem.dim + 1
             for i in range(double_dim):
                 # If first iteration, reuse the incumbent solution
@@ -499,12 +500,23 @@ class ASTRODF(Solver):
 
                 # Append the function estimate to the list
                 fval.append(adapt_soln.objectives_mean[:1]) ## Function estimates for interpolation points
+                fval_all.append(np.array(adapt_soln.objectives_mean, dtype=float))
                 interpolation_solns.append(adapt_soln)
 
             # construct the model and obtain the model coefficients
             q, grad, hessian = self.get_model_coefficients(var_z, fval, self.problem)
             logging.debug("iter %d pass %d: delta_k=%s\n  y (points)=%s\n  z (displacements)=%s\n  fval=%s\n  q=%s\n  grad=%s hessian_diag=%s",
             self.iteration_count, model_iterations, delta_k, [np.ravel(p[0]).tolist() for p in var_y], [np.ravel(p[0]).tolist() for p in var_z], [float(np.ravel(f)[0]) for f in fval], q, grad, hessian)
+            
+            logging.debug("n_objectives=%s, objectives_mean shape=%s", self.problem.n_objectives, np.shape(fval_all[0]))
+            
+            # construct models for each objective and get model coefficients for each objective (and log all)
+            for j in range(self.problem.n_objectives):
+                fval_j = [f[j : j + 1] for f in fval_all] #slice for each objective
+                q_j, grad_j, hessian_j = self.get_model_coefficients(var_z, fval_j, self.problem) # construct model for each objective in its array. 
+                # Removed printing of delta_k, var_y, var_z: same for each objective. 
+                logging.debug("iter %d pass %d obj %d: fval=%s\n q=%s\n grad=%s hessian_diag=%s", 
+                self.iteration_count, model_iterations,j, [float(np.ravel(f)[0]) for f in fval_j], np.ravel(q_j),grad_j, hessian_j)
 
             norm_grad = norm(grad)
             if delta_k <= mu * norm_grad or norm_grad == 0:

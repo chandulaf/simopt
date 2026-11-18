@@ -39,6 +39,7 @@ class ReplicationEvaluation:
     objective: float
     objective_gradient: tuple[float, ...] | None
     stochastic_constraints: tuple[StochasticConstraintEvaluation, ...] = ()
+    extra_objectives: tuple[float, ...] = ()  # NEW
 
 
 class Model:
@@ -54,6 +55,7 @@ class Model:
         self.stochastic_constraints: list[tuple[str, Constraint]] = []
         self.objective: AggregateExpression | None = None
         self.objective_sense = "minimize"
+        self.extra_objectives: list[AggregateExpression] = []
         self.n_rngs = 1
         self._declared_variables: list[DecisionVariable] = []
         self._evaluation_plan: _EvaluationPlan | None = None
@@ -225,7 +227,8 @@ class Model:
             )
             for residual in plan.stochastic_constraint_residuals
         )
-        return ReplicationEvaluation(objective_value, objective_gradient, stochastic_constraints)
+        extra_objectives = tuple(_evaluate_aggregate(expression, context) for expression in self.extra_objectives)
+        return ReplicationEvaluation(objective_value, objective_gradient, stochastic_constraints, extra_objectives)
 
     def _add_scalar_variable(
         self, lb: Number, ub: Number, name: str | None, initial: Number | None, *, integer: bool
